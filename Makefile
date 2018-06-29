@@ -1,6 +1,6 @@
 
 #CC=/opt/nec/ve/bin/musl-ncc
-CC=/opt/nec/ve/ncc/S001/bin/ncc
+CC=/opt/nec/ve/bin/ncc
 
 .PHONY: all
 all : vhcall_demo vh
