@@ -1,14 +1,42 @@
-.PHONY: all
-SRC=vhcode.c
-OBJ=$(SRC:.c=.o)
-CFLAGS=-std=gnu99 -fpic -I$(WORKSPACE)/opt/nec/ve/veos/include
-all: libvhcode.so
+#DEBUG		= -g
+FC		= gfortran
+CC		= gcc
+FCFLAGS		= -fpic -O2 $(DEBUG)
+CFLAGS		= -std=gnu99 -fpic $(DEBUG) -O2 -I$(WORKSPACE)/opt/nec/ve/veos/include
+CPPFLAGS	= -I.
+LDFLAGS		= -fpic -shared
+#-------------------------------------------------------------------------------
 
-libvhcode.so: $(OBJ)
-	$(CC) -shared -o $@ $(OBJ)
-vhcode.o: vhcode.c
-	$(CC) -c $(CFLAGS) vhcode.c -o $@
+LIBFTN	= libftnio_vh.so
+LIBDEMO	= libvhcode.so
 
-.PHONY: clean
+OBJSFTN	= ftn_write_vh.o c_write_vh.o
+OBJDEMO = vhcode.o
+
+#-------------------------------------------------------------------------------
+.PHONY: all clean default mrproper
+all: $(LIBDEMO) $(LIBFTN)
+
+.SUFFIXES: .F03 .o .so .mod .c
+
+vhcode.c: vhcode.h
+
+.F03.o:
+	rm -f $@
+	$(FC) -c -o $@ $(FCFLAGS) $(FPPFLAGS) $^
+
+.c.o:
+	rm -f $@
+	$(CC) -c -o $@ $(CFLAGS) $(CPPFLAGS) $^
+
+#-------------------------------------------------------------------------------
+
 clean:
-	rm -f *.so *.o
+	rm -f *.o *.so *.mod
+
+#-------------------------------------------------------------------------------
+$(LIBFTN): $(OBJSFTN)
+	$(FC) -o $@ $(LDFLAGS) $^
+
+$(LIBDEMO): $(OBJDEMO)
+	$(CC) -o $@ $(LDFLAGS) $^

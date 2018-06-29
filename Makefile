@@ -1,20 +1,53 @@
+DEBUG		= -g2 -traceback
 
-#CC=/opt/nec/ve/bin/musl-ncc
-CC=/opt/nec/ve/ncc/S001/bin/ncc
+CC		= /opt/nec/ve/bin/ncc
+CCFLAGS		= -fPIC -O2 $(DEBUG)
 
-.PHONY: all
-all : vhcall_demo vh
+FC		= /opt/nec/ve/bin/nfort
+FCFLAGS		= -fPIC -O2 $(DEBUG)
+CPPFLAGS	= -I.
+LDFLAGS		= -fPIC $(DEBUG)
+LDLIBS		= -lsysve
 
-vhcall_demo : vhcall_demo.o
-	$(CC) -o vhcall_demo $< -lsysve
+FMAIN		= vhcall_ftn
+FSOURCES	= $(wildcard *.F03) 
+FOBJECTS	= $(FSOURCES:.F03=.o)
 
-vhcall_demo.o : vhcall_demo.c
-	$(CC) -o vhcall_demo.o -O2 -c $<
+CMAIN		= vhcall_demo
+CSOURCES	= $(wildcard *.c)
+COBJECTS	= $(CSOURCES:.c=.o)
 
-.PHONY: clean vh
-clean :
-	rm -f vhcall_demo vhcall_demo.o
-	make -C vh clean
+.PHONY: all clean vh
+
+all : vh $(CMAIN) $(FMAIN)
+
+#-------------------------------------------------------------------------------
+.SUFFIXES: .c .F03 .o .mod
+
+%.o : %.mod
+
+vhcall_demo.o : vh/vhcode.h
+vhcall_ftn.o : vhcall_ffunctions.o
+
+.F03.o:
+	rm -f $@
+	$(FC) -c -o $@ $(FCFLAGS) $(CPPFLAGS) $<
+
+.c.o:
+	rm -f $@
+	$(CC) -c -o $@ $(CFLAGS) $(CPPFLAGS) $<
+
+$(FMAIN): $(FOBJECTS)
+	rm -f $@
+	$(FC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+$(CMAIN): $(COBJECTS)
+	rm -f $@
+	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+clean:
+	rm -f $(FMAIN) $(CMAIN) *.o *.mod
+	make -C vh $@
 
 vh:
 	make -C vh

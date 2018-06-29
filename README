@@ -1,9 +1,9 @@
 VHcall: Offloading from VE to VH
 ================================
 
-[Erich Focht, November 2017]
+[Erich Focht, June 2018]
 [... following functional description material from VEOS group ...]
-
+[... added Fortran 2003 example with interface from Matthias Langer]
 
 VHcall provides a mechanism for offloading function calls from VE to
 VH. The call is done synchronously, inside a VE system call which is
@@ -17,6 +17,22 @@ the RPMs veos-headers and veos-devel installed.
 Functions called on VH side must be compiled and linked in the form of
 a shared object, a .so library. See the example for compile and link
 options.
+
+Examples
+--------
+
+Build examples with
+
+make
+
+Test C demo:
+
+./vhcall_demo
+
+Test Fortran example:
+
+./vhcall_ftn
+
 
 
 Usage and API
@@ -91,7 +107,7 @@ Usage and API
 (4) Unload the VH library
 
    Example:
-   long res = vhcall_unload(vhcall_handle h);
+   long res = vhcall_uninstall(vhcall_handle h);
 
    Return value:
    0 if unload has succeeded, non-zero if it failed.
